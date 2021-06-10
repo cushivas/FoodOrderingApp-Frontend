@@ -1,0 +1,31 @@
+.header-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: rgb(95, 89, 89);
+    height: 40px;
+    padding: 0.5rem;
+}
+
+.app-header {
+    background-color: #263238;
+    height: 36px;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.right {
+    float: right;
+}
+
+.header-title {
+    color:#fff;
+    font-size: 18px;
+    padding: 4px 0;
+}
+
+.header-logo{
+    color: #ffffff;
+    font-size: 20px
+  }

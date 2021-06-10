@@ -10,7 +10,9 @@ class Home extends Component {
 
     render() {
         return(
-            <Header></Header>
+            <Header 
+            screen={"Home"}
+            ></Header>
         )
     }
 }
