@@ -24,8 +24,9 @@ import { InputLabel } from '@material-ui/core';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Input from '@material-ui/core/Input';
 import './Header.css'
-import { ClassRounded } from '@material-ui/icons';
 import Utility from '../Utility'
+import HTTPRequestHandler from '../Http-handler';
+import Snackbar from '@material-ui/core/Snackbar';
 
 
 /**
@@ -128,9 +129,11 @@ class Header extends Component {
       registrationPasswordInvalid: 'dispNone',
       registrationPhone: '',
       registrationPhoneRequired: 'dispNone',
-      registrationPhoneInvalid: 'dispNone'
-
-
+      registrationPhoneInvalid: 'dispNone',
+      showSnackbar: false,
+      snackbarMessage: '',
+      registrationFailedMessage:'',
+      registrationFailed:'dispNone',
     };
   }
 
@@ -160,25 +163,29 @@ class Header extends Component {
     this.setState({
       modalIsOpen: true,
       tabIndex: 0,
-      phoneNumber: '',
+      phoneNumber: '9898989898',
       phoneNumberRequired: 'dispNone',
       phoneNumberInvalid: 'dispNone',
-      password: '',
+      password: 'Bhu1*',
       passwordRequired: 'dispNone',
       passwordInvalid: 'dispNone',
       notRegistered: 'dispNone',
-      firstname: '',
+      firstname: 'James',
       firstnameRequired: 'dispNone',
-      lastname: '',
-      email: '',
+      lastname: 'Smith',
+      email: 'smith@noreply.com',
       emailRequired: 'dispNone',
       invalidEmail: 'dispNone',
-      registrationPassword: '',
+      registrationPassword: 'Bhu1*',
       registrationPasswordRequired: 'dispNone',
       registrationPasswordInvalid: 'dispNone',
-      registrationPhone: '',
+      registrationPhone: '9898989898',
       registrationPhoneRequired: 'dispNone',
-      registrationPhoneInvalid: 'dispNone'
+      registrationPhoneInvalid: 'dispNone',
+      showSnackbar : false,
+      snackbarMessage:'',
+      registrationFailedMessage:'',
+      registrationFailed:'dispNone',
     })
   }
 
@@ -351,13 +358,50 @@ class Header extends Component {
     }
 
     if (isFirstNameValid && isEmailValid && isPasswordValid && isPhoneValid) {
-      // Make API call here
+      let requestBody = {
+          "contact_number": this.state.registrationPhone,
+          "email_address": this.state.email,
+          "first_name": this.state.firstname,
+          "last_name": this.state.lastname,
+          "password": this.state.registrationPassword
+      }
+
+      HTTPRequestHandler.doSignup(requestBody).then(res=>{
+        if(res && res.code  && (res.code=== 'SGR-001' || res.code=== 'SGR-002'
+         || res.code=== 'SGR-003' || res.code=== 'SGR-004' || res.code=== 'SGR-005')) {
+            this.setState({
+              registrationFailed:'dispBlock',
+              registrationFailedMessage:res.message
+            })
+            return;
+        }else if(res && res.id) {
+          // registration success use case
+          this.setState({
+            showSnackbar:true,
+            snackbarMessage:"Registered successfully! Please login now!",
+            tabIndex:0
+          })
+        }
+      }).catch((error) => {
+        this.setState({
+          registrationFailed:'dispBlock',
+          registrationFailedMessage:error.message
+        })
+        return;
+      });
+
     }
+  }
 
+  /**
+   *  Explicit Snackbar close handler
+   *  This handler will be called when user wants to close snackbar himself.
+   */
 
-
-
-
+  handleClose = () =>{
+    this.setState({
+      showSnackbar :false
+    })
   }
 
   
@@ -373,7 +417,9 @@ class Header extends Component {
         registrationPasswordRequired: 'dispNone',
         registrationPasswordInvalid: 'dispNone',
         registrationPhoneRequired: 'dispNone',
-        registrationPhoneInvalid: 'dispNone'
+        registrationPhoneInvalid: 'dispNone',
+        registrationFailedMessage:'',
+        registrationFailed:'dispNone',
       })
     }
 
@@ -552,12 +598,17 @@ resetLoginFormValidators = () => {
             <br /> <br />
             <FormControl required fullWidth={true}>
               <InputLabel htmlFor="registrationphone">Contact No.</InputLabel>
-              <Input id="registrationphone" type="password" registrationpassword={this.state.registrationphone} onChange={this.registrationPhoneChangeHandler} fullWidth={true} autoComplete='false' />
+              <Input id="registrationphone" type="text" registrationpassword={this.state.registrationphone} onChange={this.registrationPhoneChangeHandler} fullWidth={true} autoComplete='false' />
               <FormHelperText className={this.state.registrationPhoneRequired}>
                 <span className="red">required</span>
               </FormHelperText>
               <FormHelperText className={this.state.registrationPhoneInvalid}>
                 <span className="red">Contact No. must contain only numbers and must be 10 digits long</span>
+              </FormHelperText>
+
+              <FormHelperText className={this.state.registrationFailed}>
+                <br/>
+                <span className="red">{this.state.registrationFailedMessage}</span>
               </FormHelperText>
             </FormControl>
 
@@ -565,8 +616,17 @@ resetLoginFormValidators = () => {
             <Button variant="contained" color="primary" onClick={this.registerClickHandler}>REGISTER</Button>
           </TabContainer>
         }
-
+        
       </Modal>
+
+      <Snackbar
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        open={this.state.showSnackbar}
+        onClose={this.handleClose}
+        message={this.state.snackbarMessage}
+        key='bottom-left' 
+        autoHideDuration={6000}
+      />
     </div>)
   }
 }

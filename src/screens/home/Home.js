@@ -3,6 +3,7 @@ import Header from '../../common/header/Header';
 import RestaurantCard from '../../common/restaurant-card/Restaurant-card'
 import './Home.css';
 import {withStyles} from '@material-ui/core/styles';
+import HTTPRequestHandler from '../../common/Http-handler';
 
 
 const homeStyles =  theme => ({
@@ -48,6 +49,13 @@ class Home extends Component {
     
     constructor(props) {
         super(props);
+    }
+
+
+    async componentDidMount() {
+      await HTTPRequestHandler.getAllRestaurants().then(res => {
+        console.log(res.json());
+      })
     }
 
     /**
