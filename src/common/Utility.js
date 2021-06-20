@@ -7,7 +7,6 @@ class Utility {
         return re.test(email);
     }
 
-
     static validatePassword(password) {
         const re = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{4,}$/;
         return re.test(password)

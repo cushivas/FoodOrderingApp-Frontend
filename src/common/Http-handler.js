@@ -31,7 +31,7 @@ class HTTPRequestHandler {
 
   static getAllRestaurants = async () => {
     const restaurantList = await fetch(HTTPRequestHandler.domainName + '/api/restaurant');
-    return restaurantList;
+    return restaurantList.json();
   }
 
 

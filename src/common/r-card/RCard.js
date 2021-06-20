@@ -1,4 +1,4 @@
-import './Restaurant-card.css';
+import './RCard.css';
 import React, { Component } from 'react';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
@@ -24,14 +24,14 @@ const cardStyles = theme =>({
 });
 
 
-class RestaurantCard extends Component {
+class RCard extends Component {
 
     constructor() {
         super();
     }
 
     render() {
-        const { classes, data } = this.props;
+        const { data , classes } = this.props;
         return(
             <Card className={classes.root}>
                 <CardActionArea>
@@ -68,7 +68,7 @@ class RestaurantCard extends Component {
 }
 
 
-export default withStyles(cardStyles)(RestaurantCard);
+export default withStyles(cardStyles)(RCard);
 
 
 
