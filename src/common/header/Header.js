@@ -81,7 +81,7 @@ const customStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
-    minWidth:400
+    minWidth: 400
   }
 };
 /**
@@ -106,6 +106,9 @@ TabContainer.propTypes = {
 
 
 class Header extends Component {
+
+  loggedInUserData = null;
+
   constructor() {
     super();
     this.state = {
@@ -132,8 +135,11 @@ class Header extends Component {
       registrationPhoneInvalid: 'dispNone',
       showSnackbar: false,
       snackbarMessage: '',
-      registrationFailedMessage:'',
-      registrationFailed:'dispNone',
+      registrationFailedMessage: '',
+      registrationFailed: 'dispNone',
+      loggedIn: false,
+      showLoginError: 'dispNone',
+      loginErrorMessage: ''
     };
   }
 
@@ -182,10 +188,12 @@ class Header extends Component {
       registrationPhone: '9898989898',
       registrationPhoneRequired: 'dispNone',
       registrationPhoneInvalid: 'dispNone',
-      showSnackbar : false,
-      snackbarMessage:'',
-      registrationFailedMessage:'',
-      registrationFailed:'dispNone',
+      showSnackbar: false,
+      snackbarMessage: '',
+      registrationFailedMessage: '',
+      registrationFailed: 'dispNone',
+      showLoginError: 'dispNone',
+      loginErrorMessage: ''
     })
   }
 
@@ -232,17 +240,17 @@ class Header extends Component {
   /**
    *  Login Button Click Handler
    */
-  loginClickHandler = () => {
+  loginClickHandler = async () => {
     this.resetLoginFormValidators();
     let isValidPhone = true;
     if (this.state.phoneNumber === '') {
       isValidPhone = false;
       this.setState({ phoneNumberRequired: 'dispBlock' });
-    }else if (!Utility.validatePhone(this.state.phoneNumber)) {
+    } else if (!Utility.validatePhone(this.state.phoneNumber)) {
       isValidPhone = false;
       this.setState({ phoneNumberInvalid: 'dispBlock' });
     }
-    
+
     let isValidPass = true;
     if (this.state.password === '') {
       isValidPass = false;
@@ -250,9 +258,39 @@ class Header extends Component {
     }
 
     if (isValidPass && isValidPhone) {
-      // Do api call here...
+      const encodedLoginData = 'Basic ' + btoa(this.state.phoneNumber + ':' + this.state.password);
+      
+      const self = this;
+      let xhrLogin = new XMLHttpRequest();
+        xhrLogin.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                if(xhrLogin.status === 200) {
+                  console.log(xhrLogin.getResponseHeader('access-token'));
+                  sessionStorage.setItem('uuid', JSON.parse(this.responseText).id);
+                  sessionStorage.setItem('access-token', xhrLogin.getResponseHeader('access-token'));
+                  self.setState({
+                    showSnackbar: true,
+                    snackbarMessage: "Logged in successfully!",
+                    modalIsOpen: false,
+                    loggedIn: true
+                  })
+                  self.loggedInUserData = JSON.parse(this.responseText);
+                } else {
+                  self.setState({
+                    showLoginError: 'dispBlock',
+                    loginErrorMessage: JSON.parse(this.responseText).message
+                  })
+                }
+            }
+        })
+
+        xhrLogin.open("POST", "http://localhost:3080/api/customer/login");
+        xhrLogin.setRequestHeader("Authorization", encodedLoginData);
+        xhrLogin.setRequestHeader("Content-Type", "application/json");
+        xhrLogin.setRequestHeader("Cache-Control", "no-cache");
+        xhrLogin.send(null);
+
     }
-    // Make a login api call here
   }
 
 
@@ -359,33 +397,33 @@ class Header extends Component {
 
     if (isFirstNameValid && isEmailValid && isPasswordValid && isPhoneValid) {
       let requestBody = {
-          "contact_number": this.state.registrationPhone,
-          "email_address": this.state.email,
-          "first_name": this.state.firstname,
-          "last_name": this.state.lastname,
-          "password": this.state.registrationPassword
+        "contact_number": this.state.registrationPhone,
+        "email_address": this.state.email,
+        "first_name": this.state.firstname,
+        "last_name": this.state.lastname,
+        "password": this.state.registrationPassword
       }
 
-      HTTPRequestHandler.doSignup(requestBody).then(res=>{
-        if(res && res.code  && (res.code=== 'SGR-001' || res.code=== 'SGR-002'
-         || res.code=== 'SGR-003' || res.code=== 'SGR-004' || res.code=== 'SGR-005')) {
-            this.setState({
-              registrationFailed:'dispBlock',
-              registrationFailedMessage:res.message
-            })
-            return;
-        }else if(res && res.id) {
+      HTTPRequestHandler.doSignup(requestBody).then(res => {
+        if (res && res.code && (res.code === 'SGR-001' || res.code === 'SGR-002'
+          || res.code === 'SGR-003' || res.code === 'SGR-004' || res.code === 'SGR-005')) {
+          this.setState({
+            registrationFailed: 'dispBlock',
+            registrationFailedMessage: res.message
+          })
+          return;
+        } else if (res && res.id) {
           // registration success use case
           this.setState({
-            showSnackbar:true,
-            snackbarMessage:"Registered successfully! Please login now!",
-            tabIndex:0
+            showSnackbar: true,
+            snackbarMessage: "Registered successfully! Please login now!",
+            tabIndex: 0
           })
         }
       }).catch((error) => {
         this.setState({
-          registrationFailed:'dispBlock',
-          registrationFailedMessage:error.message
+          registrationFailed: 'dispBlock',
+          registrationFailedMessage: error.message
         })
         return;
       });
@@ -398,46 +436,46 @@ class Header extends Component {
    *  This handler will be called when user wants to close snackbar himself.
    */
 
-  handleClose = () =>{
+  handleClose = () => {
     this.setState({
-      showSnackbar :false
+      showSnackbar: false
     })
   }
 
-  
-    /** 
-     *  Reset Validates state for Registration form
-     * 
-    */
-     resetRegistrationFormValidations = () => {
-      this.setState({
-        firstnameRequired: 'dispNone',
-        emailRequired: 'dispNone',
-        invalidEmail: 'dispNone',
-        registrationPasswordRequired: 'dispNone',
-        registrationPasswordInvalid: 'dispNone',
-        registrationPhoneRequired: 'dispNone',
-        registrationPhoneInvalid: 'dispNone',
-        registrationFailedMessage:'',
-        registrationFailed:'dispNone',
-      })
-    }
 
-    
-/**
- * Reset Login Form Validation messages
- *
- * @memberof Header
- */
-resetLoginFormValidators = () => {
-      this.setState({
-        phoneNumberRequired: 'dispNone',
-        phoneNumberInvalid: 'dispNone',
-        passwordRequired: 'dispNone',
-        passwordInvalid: 'dispNone',
-        notRegistered: 'dispNone',
-      })
-    }
+  /** 
+   *  Reset Validates state for Registration form
+   * 
+  */
+  resetRegistrationFormValidations = () => {
+    this.setState({
+      firstnameRequired: 'dispNone',
+      emailRequired: 'dispNone',
+      invalidEmail: 'dispNone',
+      registrationPasswordRequired: 'dispNone',
+      registrationPasswordInvalid: 'dispNone',
+      registrationPhoneRequired: 'dispNone',
+      registrationPhoneInvalid: 'dispNone',
+      registrationFailedMessage: '',
+      registrationFailed: 'dispNone',
+    })
+  }
+
+
+  /**
+   * Reset Login Form Validation messages
+   *
+   * @memberof Header
+   */
+  resetLoginFormValidators = () => {
+    this.setState({
+      phoneNumberRequired: 'dispNone',
+      phoneNumberInvalid: 'dispNone',
+      passwordRequired: 'dispNone',
+      passwordInvalid: 'dispNone',
+      notRegistered: 'dispNone',
+    })
+  }
 
 
 
@@ -465,7 +503,7 @@ resetLoginFormValidators = () => {
               }}
             />}
 
-          {(screen === "Home") &&
+          {(!this.state.loggedIn) &&
             <Button
               variant="contained"
               color="default"
@@ -475,11 +513,11 @@ resetLoginFormValidators = () => {
               startIcon={<AccountCircle />}>
               <b> LOGIN </b>
             </Button>}
-          {(screen === "Home1" || screen === "Profile") &&
+            
+          {(this.state.loggedIn) &&
             <div>
-              <IconButton onClick={this.onClickHandler}>
-                <Avatar alt="Profile Pic" src={this.props.userProfileUrl} className={classes.avatar} style={{ border: "1px solid #fff" }} />
-              </IconButton>
+              <Button onClick={this.onClickHandler} startIcon={<AccountCircle />}>
+              </Button>
               <Popover
                 id="simple-menu"
                 anchorEl={this.state.anchorEl}
@@ -541,8 +579,8 @@ resetLoginFormValidators = () => {
                 <span className="red">Invalid Credentials</span>
               </FormHelperText>
 
-              <FormHelperText className={this.state.notRegistered}>
-                <span className="red">This contact number has not been registered</span>
+              <FormHelperText className={this.state.showLoginError}>
+                <span className="red">{this.state.loginErrorMessage}</span>
               </FormHelperText>
 
             </FormControl>
@@ -590,7 +628,7 @@ resetLoginFormValidators = () => {
               </FormHelperText>
 
               <FormHelperText className={this.state.registrationPasswordInvalid}>
-                <span className="red">Password must contain at least one capital letter, </span> <br/>
+                <span className="red">Password must contain at least one capital letter, </span> <br />
                 <span className="red">one small letter, one number, and one special character</span>
               </FormHelperText>
 
@@ -607,7 +645,7 @@ resetLoginFormValidators = () => {
               </FormHelperText>
 
               <FormHelperText className={this.state.registrationFailed}>
-                <br/>
+                <br />
                 <span className="red">{this.state.registrationFailedMessage}</span>
               </FormHelperText>
             </FormControl>
@@ -616,7 +654,7 @@ resetLoginFormValidators = () => {
             <Button variant="contained" color="primary" onClick={this.registerClickHandler}>REGISTER</Button>
           </TabContainer>
         }
-        
+
       </Modal>
 
       <Snackbar
@@ -624,7 +662,7 @@ resetLoginFormValidators = () => {
         open={this.state.showSnackbar}
         onClose={this.handleClose}
         message={this.state.snackbarMessage}
-        key='bottom-left' 
+        key='bottom-left'
         autoHideDuration={6000}
       />
     </div>)
