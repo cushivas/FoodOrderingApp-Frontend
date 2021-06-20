@@ -480,7 +480,7 @@ class Header extends Component {
     return (<div>
       <AppBar className={classes.appHeader}>
         <Toolbar className={classes.grow}>
-          {(screen === "Login" || screen === "Home") && <FastfoodIcon fontSize="large" style={{ color: 'whitesmoke' }}></FastfoodIcon>}
+          {(screen === "Details" || screen === "Home") && <FastfoodIcon fontSize="large" style={{ color: 'whitesmoke' }}></FastfoodIcon>}
           {(screen === "Home") &&
             <TextField
               className={classes.search}

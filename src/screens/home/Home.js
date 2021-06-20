@@ -106,6 +106,11 @@ class Home extends Component {
     })
   }
 
+  handleCardClick = (cardData) => {
+    console.log(cardData)
+    this.props.history.push('/restaurant/'+ cardData.id , { id: cardData.id });
+  }
+
 
 
   render() {
@@ -120,7 +125,7 @@ class Home extends Component {
         <div className={classes.grid}>
           <GridList className={classes.gridList} cellHeight={'auto'}>
             {this.state.filteredData.map(data => (
-              <Card className={classes.cardroot} key={data.id}>
+              <Card className={classes.cardroot} key={data.id} onClick={this.handleCardClick.bind(this, data)}>
                 <CardActionArea>
                   <CardMedia className={classes.images} style={{ borderRadius: '5px' }}
                     image={data.photo_URL}
