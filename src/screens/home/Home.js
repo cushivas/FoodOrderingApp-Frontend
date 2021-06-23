@@ -48,11 +48,14 @@ const homeStyles = theme => ({
   grid: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginTop: 90
   },
   cardroot: {
     maxWidth: 320,
-    margin: '0.75rem 1rem 0.75rem 1rem'
+    margin: '0.75rem 1rem 0.75rem 1rem',
+    [theme.breakpoints.down('xs')]: {
+      maxWidth: "100vh",
+      margin: theme.spacing(2),
+    }
   },
   images: {
     height: 140,
@@ -108,7 +111,7 @@ class Home extends Component {
 
   handleCardClick = (cardData) => {
     console.log(cardData)
-    this.props.history.push('/restaurant/'+ cardData.id , { id: cardData.id });
+    this.props.history.push('/restaurant/'+ cardData.id , { id: cardData.id, categories:cardData.categories });
   }
 
 

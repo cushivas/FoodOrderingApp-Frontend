@@ -32,10 +32,23 @@ import Snackbar from '@material-ui/core/Snackbar';
  */
 
 const headerStyles = theme => ({
+
+  headerroot: {
+    minHeight:64,
+    [theme.breakpoints.down('xs')]: {
+      minHeight:140,
+      maxHeight:145,
+    }
+  },
   grow: {
     flexGrow: 1,
     flexDirection: "row",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
+    [theme.breakpoints.down('xs')]: {
+      flexDirection: "column",
+      alignItems:"flex-start"
+      
+    }
   },
   search: {
     position: 'relative',
@@ -477,7 +490,7 @@ class Header extends Component {
 
   render() {
     const { classes, screen } = this.props;
-    return (<div>
+    return (<div className={classes.headerroot}>
       <AppBar className={classes.appHeader}>
         <Toolbar className={classes.grow}>
           {(screen === "Details" || screen === "Home") && <FastfoodIcon fontSize="large" style={{ color: 'whitesmoke' }}></FastfoodIcon>}

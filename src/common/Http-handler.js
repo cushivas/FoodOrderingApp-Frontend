@@ -35,6 +35,12 @@ class HTTPRequestHandler {
   }
 
 
+  static getRestaurantDetails = async (id) => {
+    const restaurantDetails = await fetch(HTTPRequestHandler.domainName + '/api/restaurant/'+id);
+    return restaurantDetails.json();
+  }
+
+
   async doLogin (authentication) {
     const responseData = await fetch(HTTPRequestHandler.domainName + '/api/customer/login', {
       method: 'POST', // *GET, POST, PUT, DELETE, etc.
