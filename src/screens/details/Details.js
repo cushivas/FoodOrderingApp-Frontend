@@ -15,6 +15,7 @@ import Badge from '@material-ui/core/Badge';
 import Button from '@material-ui/core/Button';
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart';
 import RemoveIcon from '@material-ui/icons/Remove';
+import Snackbar from '@material-ui/core/Snackbar';
 
 
 const detailsStyles = theme => ({
@@ -73,8 +74,13 @@ class Details extends Component {
             id: routeData,
             details: {},
             categories: categoryData,
-            orderItems: {id: null, items: [], total: 0},
-            totalAmount:0.00,
+            orderItems: { id: null, items: [], total: 0 },
+            totalAmount: 0.00,
+            cartItems: [],
+            open: false,
+            totalItems: 0,
+            nonloggedIn:false,
+
         }; // Read values passed on state
     }
 
@@ -89,7 +95,7 @@ class Details extends Component {
     }
 
 
-    Capitalize(str) {
+    capitalize = (str) => {
         var arr = str.split(" ")
         var pascalCasedString = ""
         arr.map(a => (
@@ -98,6 +104,127 @@ class Details extends Component {
         )
         return pascalCasedString
     }
+
+
+    getIndex = (value, arr, prop) => {
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i][prop] === value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
+    addItemToCartHandler = (event, id, type, name, price) => {
+        let totalAmount = this.state.totalAmount + price;
+        let totalItems = this.state.totalItems + 1;
+
+        if (this.state.orderItems.items !== undefined && this.state.orderItems.items.some(item => (item.name === name))) {
+            const index = this.getIndex(name, this.state.orderItems.items, "name");
+            let currentOrderState = this.state.orderItems;
+            currentOrderState.items[index].quantity = currentOrderState.items[index].quantity + 1;
+            currentOrderState.items[index].priceForAll = currentOrderState.items[index].priceForAll + currentOrderState.items[index].pricePerItem;
+            this.setState({
+                orderItems: currentOrderState
+            })
+            /*       let item = this.state.orderItems.items[index];
+                  item.quantity = quantity;
+                  item.priceForAll = priceForAll;
+                  this.setState(item); */
+
+        } else {
+            // lets create new Item object
+            const newlyAddedItem = {};
+            newlyAddedItem.id = id;
+            newlyAddedItem.type = type;
+            newlyAddedItem.name = name;
+            newlyAddedItem.pricePerItem = price;
+            newlyAddedItem.quantity = 1;
+            newlyAddedItem.priceForAll = price;
+
+            // Current CartItems State
+            let cartItemsArr = this.state.cartItems;
+            cartItemsArr.push(newlyAddedItem);
+            const orderItems = this.state.orderItems;
+            orderItems.items = this.state.cartItems;
+            this.setState({ orderItems: orderItems });
+        }
+
+        this.setState({ open: true });
+        this.setState({ totalItems: totalItems });
+        this.setState({ totalAmount: totalAmount });
+    }
+
+
+    removeFromCartHandler = (event, id, type, name, price) => {
+        let currentOrderItems = this.state.orderItems;
+        const index = this.getIndex(name, currentOrderItems.items, "name");
+       
+        if (currentOrderItems.items[index].quantity > 1) {
+            currentOrderItems.items[index].quantity = currentOrderItems.items[index].quantity - 1;
+            currentOrderItems.items[index].priceForAll = currentOrderItems.items[index].priceForAll - currentOrderItems.items[index].pricePerItem;
+            /* var item = this.state.orderItems.items[index];
+            item.quantity = quantity;
+            item.priceForAll = priceForAll; */
+        } else {
+            currentOrderItems.items.splice(index, 1);
+        }
+
+        this.setState({itemQuantityDecreased: true,
+            orderItems: currentOrderItems
+        });
+
+        const totalAmt = this.state.totalAmount -= price;
+        const totalItms = this.state.totalItems -= 1;
+        this.setState({totalItems: totalItms, totalAmount: totalAmt});
+    }
+
+
+    addAnItemFromCartHandler = (item, index) => {
+        let currentOrderItems = this.state.orderItems;
+        const itemIndex = this.getIndex(item.name, currentOrderItems.items, "name");
+
+        currentOrderItems.items[itemIndex].quantity = currentOrderItems.items[itemIndex].quantity + 1;
+        currentOrderItems.items[itemIndex].priceForAll = currentOrderItems.items[itemIndex].priceForAll + currentOrderItems.items[itemIndex].pricePerItem;
+        /* let itemAdded = currentOrderItems.items[itemIndex];
+        itemAdded.quantity = quantity;
+        itemAdded.priceForAll = priceForAll; */
+       // this.setState(item);
+        this.setState({ itemQuantityIncreased: true });
+        let totalAmount = this.state.totalAmount;
+        totalAmount += item.pricePerItem;
+        let totalItems = this.state.totalItems;
+        totalItems += 1;
+        this.setState({
+            orderItems: currentOrderItems
+        });
+
+        this.setState({ totalItems: totalItems });
+        this.setState({ totalAmount: totalAmount });
+    }
+
+
+    checkoutHandler = () => {
+        if (this.state.totalItems === 0) {
+            this.setState({cartEmpty: true});
+        } else if (this.state.totalItems > 0 && sessionStorage.getItem('access-token') === null) {
+            this.setState({nonloggedIn: true});
+        } else {
+            this.props.history.push({
+                pathname: '/checkout/',
+                state: {
+                    orderItems: this.state.orderItems,
+                    total: this.state.totalAmount, restaurantName: this.restaurantDetails.restaurant_name
+                }
+            })
+        }
+    }
+
+
+
+
+
 
     render() {
 
@@ -181,11 +308,11 @@ class Details extends Component {
                                         <Grid item xs={6} lg={6}>
                                             <Typography>
                                                 <span
-                                                    className="item-name">  {this.Capitalize(item.item_name)} </span>
+                                                    className="item-name">  {this.capitalize(item.item_name)} </span>
                                             </Typography>
                                         </Grid>
                                         <Grid item xs={3} lg={3}>
-                                            <div className='pricePerItem'>
+                                            <div style={{float:'right'}}>
                                                 <span>
                                                     <i className="fa fa-inr" aria-hidden="true"></i>
                                                     <span
@@ -195,8 +322,8 @@ class Details extends Component {
                                         </Grid>
 
                                         <Grid item xs={2} lg={2}>
-                                            <IconButton style={{ padding: 0, float: 'left' }}
-                                                onClick={(e) => this.addToCartHandler(e, item.id, item.item_type, item.item_name, item.price)}>
+                                            <IconButton style={{ padding: 0, float: 'right' }}
+                                                onClick={(e) => this.addItemToCartHandler(e, item.id, item.item_type, item.item_name, item.price)}>
                                                 <AddIcon style={{ padding: 0, fontSize: "24px" }} />
                                             </IconButton>
                                         </Grid>
@@ -230,27 +357,27 @@ class Details extends Component {
                                                                     aria-hidden="true"
                                                                     style={{
                                                                         fontSize: "12px",
-                                                                        color: "green",
+                                                                        color: "#2a8000",
                                                                         paddingRight: "12px"
                                                                     }} /> :
                                                                 <span className="fa fa-stop-circle-o"
                                                                     aria-hidden="true"
                                                                     style={{
                                                                         fontSize: "12px",
-                                                                        color: "red",
+                                                                        color: "#ff0000",
                                                                         paddingRight: "12px"
                                                                     }} />}
                                                         </Grid>
                                                         <Grid item xs={3} lg={4}>
-                                                            <Typography>
-                                                                {this.Capitalize(item.name)}
+                                                            <Typography color="textSecondary">
+                                                                {this.capitalize(item.name)}
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3} lg={3} style={{ flexWrap: "wrap" }}>
                                                             <div className='add-remove-icon'>
                                                                 <IconButton className='add-remove-button-hover'
                                                                     style={{ display: "flex", padding: 0 }}
-                                                                    onClick={(e) => this.removeFromCartHandler(e, item.id, item.type, item.name, item.pricePerItem)}><RemoveIcon
+                                                                     onClick={(e) => this.removeFromCartHandler(e, item.id, item.type, item.name, item.pricePerItem)} ><RemoveIcon
                                                                         fontSize='default'
                                                                         style={{ color: 'black', fontWeight: "bolder" }} /></IconButton>
                                                                 <Typography
@@ -271,6 +398,7 @@ class Details extends Component {
                                                                     style={{ paddingLeft: "2px" }}>{item.priceForAll.toFixed(2)}</span>
                                                             </span>
                                                         </Grid>
+                                                        <Divider />
                                                     </Fragment>
                                                 )) : null}
                                         <Grid item xs={8} lg={9}>
@@ -298,18 +426,61 @@ class Details extends Component {
                         </Card>
                     </div>
 
-                    {/* <CustomizedSnackbar open={this.state.open} closeHandler={this.closeHandler}
-                        message="Item added to cart!" />
-                    <CustomizedSnackbar open={this.state.cartEmpty} closeHandler={this.closeHandler}
-                        message="Please add an item to your cart!" />
-                    <CustomizedSnackbar open={this.state.itemQuantityDecreased} closeHandler={this.closeHandler}
-                        message="Item quantity decreased by 1!" />
-                    <CustomizedSnackbar open={this.state.nonloggedIn} closeHandler={this.closeHandler}
-                        message="Please login first!" />
-                    <CustomizedSnackbar open={this.state.itemRemovedFromCart} closeHandler={this.closeHandler}
-                        message="Item removed from cart!" />
-                    <CustomizedSnackbar open={this.state.itemQuantityIncreased} closeHandler={this.closeHandler}
-                        message="Item quantity increased by 1!" /> */}
+                    <Snackbar
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        open={this.state.open}
+                        onClose={this.handleClose}
+                        message="Item added to cart!"
+                        key='Item added to cart!'
+                        autoHideDuration={3000}
+                    />
+
+                        <Snackbar
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        open={this.state.cartEmpty}
+                        onClose={this.handleClose}
+                        message="Please add an item to your cart!"
+                        key='Please add an item to your cart!'
+                        autoHideDuration={3000}
+                        />
+
+                        <Snackbar
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        open={this.state.itemQuantityDecreased}
+                        onClose={this.handleClose}
+                        message="Item quantity decreased by 1!"
+                        key='Item quantity decreased by 1!'
+                        autoHideDuration={3000}
+                        />
+
+                        <Snackbar
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        open={this.state.nonloggedIn}
+                        onClose={this.handleClose}
+                        message="Please login first!"
+                        key='Please login first!'
+                        autoHideDuration={3000}
+                        />
+
+
+                        <Snackbar
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        open={this.state.itemRemovedFromCart}
+                        onClose={this.handleClose}
+                        message="Item removed from cart!"
+                        key='Item removed from cart!'
+                        autoHideDuration={3000}
+                        />
+
+                        <Snackbar
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                        open={this.state.itemQuantityIncreased}
+                        onClose={this.handleClose}
+                        message="Item quantity increased by 1!"
+                        key='Item quantity increased by 1!'
+                        autoHideDuration={3000}
+                        />
+
 
                 </div>}
             </div>
