@@ -22,7 +22,10 @@ const detailsStyles = theme => ({
     root: {
         display: 'flex',
         flexDirection: 'row',
-        backgroundColor: 'lightgrey'
+        backgroundColor: 'lightgrey',
+        [theme.breakpoints.down('xs')]: {
+            flexDirection: 'column',
+        }
     },
     images: {
         height: 175,
@@ -30,10 +33,18 @@ const detailsStyles = theme => ({
     imageContainer: {
         width: '25%',
         padding: theme.spacing(2),
+        [theme.breakpoints.down('xs')]: {
+            width: "90% !important",
+            padding: theme.spacing(2),
+          }
     },
     container: {
         width: '75%',
         padding: theme.spacing(0.5),
+        [theme.breakpoints.down('xs')]: {
+            width: '90%',
+            margin: theme.spacing(1),
+        }
     },
     innerFlex: {
         display: 'flex',
@@ -45,15 +56,26 @@ const detailsStyles = theme => ({
         flexDirection: 'row',
         justifyContent: 'space-between',
         margin: theme.spacing(3),
+        [theme.breakpoints.down('xs')]: {
+            flexDirection: 'column',
+            margin: theme.spacing(1),
+        }
     },
     leftItemContainer: {
         width: '40%',
         margin: theme.spacing(1),
+        [theme.breakpoints.down('xs')]: {
+            width: "90% !important",
+            margin: theme.spacing(2),
+          }
     },
 
     rightItemContainer: {
         width: '40%',
         margin: theme.spacing(1),
+        [theme.breakpoints.down('xs')]: {
+            width: "95% !important",
+          }
     },
     leftmenu: {
         width: '100%',
@@ -164,37 +186,34 @@ class Details extends Component {
     removeFromCartHandler = (event, id, type, name, price) => {
         let currentOrderItems = this.state.orderItems;
         const index = this.getIndex(name, currentOrderItems.items, "name");
-       
+
         if (currentOrderItems.items[index].quantity > 1) {
             currentOrderItems.items[index].quantity = currentOrderItems.items[index].quantity - 1;
             currentOrderItems.items[index].priceForAll = currentOrderItems.items[index].priceForAll - currentOrderItems.items[index].pricePerItem;
-            /* var item = this.state.orderItems.items[index];
-            item.quantity = quantity;
-            item.priceForAll = priceForAll; */
         } else {
             currentOrderItems.items.splice(index, 1);
         }
-
         this.setState({itemQuantityDecreased: true,
             orderItems: currentOrderItems
         });
-
-        const totalAmt = this.state.totalAmount -= price;
-        const totalItms = this.state.totalItems -= 1;
+        const totalAmt = this.state.totalAmount - price;
+        const totalItms = this.state.totalItems -1;
         this.setState({totalItems: totalItms, totalAmount: totalAmt});
     }
 
+    /**
+     * 
+     * @param {*} item 
+     * @param {*} index 
+     */
 
-    addAnItemFromCartHandler = (item, index) => {
+    addItemDirectlyFromUserCart = (item, index) => {
         let currentOrderItems = this.state.orderItems;
         const itemIndex = this.getIndex(item.name, currentOrderItems.items, "name");
 
+
         currentOrderItems.items[itemIndex].quantity = currentOrderItems.items[itemIndex].quantity + 1;
         currentOrderItems.items[itemIndex].priceForAll = currentOrderItems.items[itemIndex].priceForAll + currentOrderItems.items[itemIndex].pricePerItem;
-        /* let itemAdded = currentOrderItems.items[itemIndex];
-        itemAdded.quantity = quantity;
-        itemAdded.priceForAll = priceForAll; */
-       // this.setState(item);
         this.setState({ itemQuantityIncreased: true });
         let totalAmount = this.state.totalAmount;
         totalAmount += item.pricePerItem;
@@ -208,6 +227,12 @@ class Details extends Component {
         this.setState({ totalAmount: totalAmount });
     }
 
+    /**
+     * 
+     * Event handler for checkout button click
+     * Show error if no items in cart.
+     * 
+     */
 
     checkoutHandler = () => {
         if (this.state.totalItems === 0) {
@@ -224,6 +249,10 @@ class Details extends Component {
             })
         }
     }
+
+    /**
+     *  Reset all the snackbar messages
+     */
 
     handleClose = () => {
         this.setState({
@@ -338,7 +367,7 @@ class Details extends Component {
                                         </Grid>
 
                                         <Grid item xs={2} lg={2}>
-                                            <IconButton style={{ padding: 0, float: 'right' }}
+                                            <IconButton style={{ padding: '5px', float: 'right' }}
                                                 onClick={(e) => this.addItemToCartHandler(e, item.id, item.item_type, item.item_name, item.price)}>
                                                 <AddIcon style={{ padding: 0, fontSize: "24px" }} />
                                             </IconButton>
@@ -385,22 +414,22 @@ class Details extends Component {
                                                                     }} />}
                                                         </Grid>
                                                         <Grid item xs={3} lg={4}>
-                                                            <Typography color="textSecondary">
+                                                            <Typography variant="subtitle1" color="textSecondary">
                                                                 {this.capitalize(item.name)}
                                                             </Typography>
                                                         </Grid>
                                                         <Grid item xs={3} lg={3} style={{ flexWrap: "wrap" }}>
                                                             <div className='add-remove-icon'>
                                                                 <IconButton className='add-remove-button-hover'
-                                                                    style={{ display: "flex", padding: 0 }}
+                                                                    style={{ display: "flex", padding: '5px'}}
                                                                      onClick={(e) => this.removeFromCartHandler(e, item.id, item.type, item.name, item.pricePerItem)} ><RemoveIcon
                                                                         fontSize='default'
                                                                         style={{ color: 'black', fontWeight: "bolder" }} /></IconButton>
-                                                                <Typography
+                                                                <Typography variant="subtitle1"
                                                                     style={{ fontWeight: 'bold' }}>{item.quantity}</Typography>
                                                                 <IconButton className='add-remove-button-hover'
-                                                                    style={{ display: "flex", padding: 0 }}
-                                                                    onClick={this.addAnItemFromCartHandler.bind(this, item, index)}>
+                                                                    style={{ display: "flex", padding: '5px'}}
+                                                                    onClick={this.addItemDirectlyFromUserCart.bind(this, item, index)}>
                                                                     <AddIcon fontSize='default' style={{
                                                                         color: 'black',
                                                                         fontWeight: "bolder"

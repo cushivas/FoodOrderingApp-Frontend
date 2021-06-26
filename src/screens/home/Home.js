@@ -49,12 +49,12 @@ const homeStyles = theme => ({
     display: 'flex',
     justifyContent: 'space-between',
   },
-  cardroot: {
-    maxWidth: 320,
-    margin: '0.75rem 1rem 0.75rem 1rem',
+  parentcardroot: {
+    maxWidth: 340,
+    margin: '1rem',
     [theme.breakpoints.down('xs')]: {
-      maxWidth: "100vh",
-      margin: theme.spacing(2),
+      width: "100% !important",
+      margin: '1rem',
     }
   },
   images: {
@@ -82,6 +82,9 @@ class Home extends Component {
     }
   }
 
+  /**
+   *  React Lifecycle method 
+   */
 
   async componentDidMount() {
     await HTTPRequestHandler.getAllRestaurants().then(res => {
@@ -109,13 +112,15 @@ class Home extends Component {
     })
   }
 
+  /**
+   * When user clicks on Restaurant card, this event will be invoked
+   * @param {*} cardData 
+   */
+
   handleCardClick = (cardData) => {
     console.log(cardData)
-    this.props.history.push('/restaurant/'+ cardData.id , { id: cardData.id, categories:cardData.categories });
+    this.props.history.push('/restaurant/' + cardData.id, { id: cardData.id, categories: cardData.categories });
   }
-
-
-
 
   render() {
     const { classes } = this.props;
@@ -131,7 +136,7 @@ class Home extends Component {
         <div className={classes.grid}>
           <GridList className={classes.gridList} cellHeight={'auto'}>
             {this.state.filteredData.map(data => (
-              <Card className={classes.cardroot} key={data.id} onClick={this.handleCardClick.bind(this, data)}>
+              <Card className={classes.parentcardroot} key={data.id} onClick={this.handleCardClick.bind(this, data)}>
                 <CardActionArea>
                   <CardMedia className={classes.images} style={{ borderRadius: '5px' }}
                     image={data.photo_URL}
@@ -163,6 +168,12 @@ class Home extends Component {
               </Card>
             ))}
 
+            {this.state.filteredData.length === 0 &&
+              <div style={{ margin: 10 }}>
+                <Typography variant="subHeading1" >
+                  No restaurant with the given name.
+                </Typography>
+              </div>}
           </GridList>
         </div>
 

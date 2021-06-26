@@ -19,10 +19,9 @@
 }
 
 .add-remove-button-hover:hover{
-    background-color: #fdff81 !important;
+    background-color:lightgrey !important;
 }
 
 .add-icon-plus-button {
     display: flex;
-    padding: 0;
 }

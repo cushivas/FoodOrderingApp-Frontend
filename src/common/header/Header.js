@@ -36,8 +36,15 @@ const headerStyles = theme => ({
   headerroot: {
     minHeight:64,
     [theme.breakpoints.down('xs')]: {
-      minHeight:140,
+      minHeight: 140,
       maxHeight:145,
+    }
+  },
+  headerroot2: {
+    minHeight:64,
+    [theme.breakpoints.down('xs')]: {
+      minHeight: 100,
+      maxHeight:100,
     }
   },
   grow: {
@@ -221,23 +228,23 @@ class Header extends Component {
     this.setState({
       modalIsOpen: true,
       tabIndex: 0,
-      phoneNumber: '9898989898',
+      phoneNumber: '',
       phoneNumberRequired: 'dispNone',
       phoneNumberInvalid: 'dispNone',
-      password: 'Bhu1*',
+      password: '',
       passwordRequired: 'dispNone',
       passwordInvalid: 'dispNone',
       notRegistered: 'dispNone',
       firstname: 'James',
       firstnameRequired: 'dispNone',
-      lastname: 'Smith',
-      email: 'smith@noreply.com',
+      lastname: '',
+      email: '',
       emailRequired: 'dispNone',
       invalidEmail: 'dispNone',
-      registrationPassword: 'Bhu1*',
+      registrationPassword: '',
       registrationPasswordRequired: 'dispNone',
       registrationPasswordInvalid: 'dispNone',
-      registrationPhone: '9898989898',
+      registrationPhone: '',
       registrationPhoneRequired: 'dispNone',
       registrationPhoneInvalid: 'dispNone',
       showSnackbar: false,
@@ -293,7 +300,7 @@ class Header extends Component {
    *  Login Button Click Handler
    */
   loginClickHandler = async () => {
-    this.resetLoginFormValidators();
+
     let isValidPhone = true;
     if (this.state.phoneNumber === '') {
       isValidPhone = false;
@@ -397,7 +404,7 @@ class Header extends Component {
    */
 
   registerClickHandler = () => {
-    this.resetRegistrationFormValidations();
+  
     // For firstname
     let isFirstNameValid = true;
     if (this.state.firstname === '') {
@@ -497,48 +504,19 @@ class Header extends Component {
   }
 
 
-  /** 
-   *  Reset Validates state for Registration form
-   * 
-  */
-  resetRegistrationFormValidations = () => {
-    this.setState({
-      firstnameRequired: 'dispNone',
-      emailRequired: 'dispNone',
-      invalidEmail: 'dispNone',
-      registrationPasswordRequired: 'dispNone',
-      registrationPasswordInvalid: 'dispNone',
-      registrationPhoneRequired: 'dispNone',
-      registrationPhoneInvalid: 'dispNone',
-      registrationFailedMessage: '',
-      registrationFailed: 'dispNone',
-    })
-  }
-
-
-  /**
-   * Reset Login Form Validation messages
-   *
-   * @memberof Header
-   */
-  resetLoginFormValidators = () => {
-    this.setState({
-      phoneNumberRequired: 'dispNone',
-      phoneNumberInvalid: 'dispNone',
-      passwordRequired: 'dispNone',
-      passwordInvalid: 'dispNone',
-      notRegistered: 'dispNone',
-    })
+  navigateToHome = () => {
+    this.props.history.push('/')
   }
 
 
 
   render() {
     const { classes, screen } = this.props;
-    return (<div className={classes.headerroot}>
+    return (<div className={ (screen === "Home")?classes.headerroot: classes.headerroot2}>
       <AppBar className={classes.appHeader}>
         <Toolbar className={classes.grow}>
-          {(screen === "Details" || screen === "Home") && <FastfoodIcon fontSize="large" style={{ color: 'whitesmoke' }}></FastfoodIcon>}
+          {(screen === "Details" || screen === "Home" || screen === "Profile" || screen === "Checkout") && <FastfoodIcon fontSize="large" style={{ color: 'whitesmoke' }} 
+           onClick={this.navigateToHome}></FastfoodIcon>}
           {(screen === "Home") &&
             <TextField
               className={classes.search}
