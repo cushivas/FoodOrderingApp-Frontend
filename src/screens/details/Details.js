@@ -80,6 +80,10 @@ class Details extends Component {
             open: false,
             totalItems: 0,
             nonloggedIn:false,
+            itemQuantityDecreased:false,
+            itemQuantityIncreased:false,
+            cartEmpty:false,
+            itemRemovedFromCart:false
 
         }; // Read values passed on state
     }
@@ -221,6 +225,17 @@ class Details extends Component {
         }
     }
 
+    handleClose = () => {
+        this.setState({
+            open: false,
+            nonloggedIn:false,
+            itemQuantityDecreased:false,
+            itemQuantityIncreased:false,
+            cartEmpty:false,
+            itemRemovedFromCart:false
+        })
+    }
+
 
 
 
@@ -234,6 +249,7 @@ class Details extends Component {
                 <div>
                     <Header
                         screen={"Details"}
+                        {...this.props}
                     ></Header>
                     {this.restaurantDetails && <Card className={classes.root}>
                         <div className={classes.imageContainer}>

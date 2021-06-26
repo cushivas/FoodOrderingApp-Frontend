@@ -118,8 +118,8 @@ class Header extends Component {
 
   loggedInUserData = null;
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       modalIsOpen: false,
       tabIndex: 0,
@@ -148,8 +148,19 @@ class Header extends Component {
       registrationFailed: 'dispNone',
       loggedIn: false,
       showLoginError: 'dispNone',
-      loginErrorMessage: ''
+      loginErrorMessage: '',
+      loggedInUserFirstName:''
     };
+  }
+
+  componentDidMount(){
+    if(sessionStorage.getItem('access-token') !== null && sessionStorage.getItem('first_name') !== null) {
+        // User already logged in
+        this.setState({
+          loggedIn: true,
+          loggedInUserFirstName:sessionStorage.getItem('first_name')
+        })
+    }
   }
 
   onClickHandler = (event) => {
@@ -159,13 +170,45 @@ class Header extends Component {
   }
 
   onAccountClickHandler = () => {
-    this.props.handleAccount();
+    this.navigateToProfile();
     this.onCloseButtonClickHandler();
   }
 
   onLogoutButtonClickHandler = () => {
-    this.props.handleLogout();
+    this.processLogout();
     this.onCloseButtonClickHandler();
+  }
+
+  /**
+   *  Logout the user and empty the session storage data
+   */
+  processLogout = () => {
+        let token = sessionStorage.getItem('access-token');
+        let xhr = new XMLHttpRequest();
+        let that = this;
+        xhr.addEventListener("readystatechange", function () {
+            if (this.readyState === 4) {
+                sessionStorage.removeItem('access-token');
+                sessionStorage.removeItem('uuid');
+                sessionStorage.removeItem('first_name');
+                that.setState({   loggedIn: false,
+                loggedInUserFirstName:'' });
+            }
+        });
+        let url = this.props.baseUrl + 'customer/logout';
+        xhr.open('POST', url);
+        xhr.setRequestHeader('authorization', 'Bearer ' + token);
+        xhr.setRequestHeader("Cache-Control", "no-cache");
+        xhr.send();
+  }
+
+  /**
+   *  Navigate to Profile page 
+   */
+  navigateToProfile= () =>{
+    this.props.history.push({
+      pathname: '/profile/',
+    })
   }
 
   onCloseButtonClickHandler = () => {
@@ -277,11 +320,13 @@ class Header extends Component {
                   console.log(xhrLogin.getResponseHeader('access-token'));
                   sessionStorage.setItem('uuid', JSON.parse(this.responseText).id);
                   sessionStorage.setItem('access-token', xhrLogin.getResponseHeader('access-token'));
+                  sessionStorage.setItem('first_name', JSON.parse(this.responseText).first_name);
                   self.setState({
                     showSnackbar: true,
                     snackbarMessage: "Logged in successfully!",
                     modalIsOpen: false,
-                    loggedIn: true
+                    loggedIn: true,
+                    loggedInUserFirstName: JSON.parse(this.responseText).first_name
                   })
                   self.loggedInUserData = JSON.parse(this.responseText);
                 } else {
@@ -525,7 +570,8 @@ class Header extends Component {
             
           {(this.state.loggedIn) &&
             <div>
-              <Button onClick={this.onClickHandler} startIcon={<AccountCircle />}>
+              <Button onClick={this.onClickHandler} startIcon={<AccountCircle /> } style={{color:'white'}}>
+                {this.state.loggedInUserFirstName}
               </Button>
               <Popover
                 id="simple-menu"
@@ -541,7 +587,7 @@ class Header extends Component {
                   horizontal: 'left',
                 }}>
                 <div style={{ padding: '5px' }}>
-                  {(screen === "Home") &&
+                  {(screen !== "Profile") &&
                     <div>
                       <MenuItem onClick={this.onAccountClickHandler}>My Account</MenuItem>
                       <div className={classes.hr} />

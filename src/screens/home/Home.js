@@ -116,6 +116,7 @@ class Home extends Component {
 
 
 
+
   render() {
     const { classes } = this.props;
     return (
@@ -123,6 +124,8 @@ class Home extends Component {
         <Header
           screen={"Home"}
           searchHandler={this.onSearchEntered}
+          baseUrl={this.props.baseUrl}
+          {...this.props}
         ></Header>
 
         <div className={classes.grid}>
