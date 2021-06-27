@@ -42,10 +42,7 @@ class Checkout extends Component {
         const orderItems = props.location.state.orderItems;
         const total = props.location.state.total;
         const restaurantName = props.location.state.restaurantName;
-        /*
-         orderItems: this.state.orderItems,
-                    total: this.state.totalAmount, restaurantName: this.restaurantDetails.restaurant_name
-        */
+
         this.state = {
             name: restaurantName,
             totalAmt: total,
@@ -149,7 +146,9 @@ class Checkout extends Component {
         xhr.send();
     }
 
-
+    /**
+     *  Increment step handler
+     */
 
     incrementStepHandler = () => {
         if (this.state.activeStep === 0 && this.state.selectedAddressId === undefined) {
@@ -164,6 +163,10 @@ class Checkout extends Component {
         }
     }
 
+    /**
+     *  Decrement step handler
+     */
+
     decrementStepHandler = () => {
         let activeState = this.state.activeStep - 1;
         this.setState({ activeStep: activeState })
@@ -172,12 +175,21 @@ class Checkout extends Component {
     resetStepHandler = () => {
         this.setState({ activeStep: 0, displayChange: 'dispNone' })
     }
+    /**
+     * Tab change handler
+     * @param {*} value 
+     */
     onTabChange = (value) => {
         this.setState({ activeTabValue: value })
         if (value === 'existing_address') {
             this.getAddress();
         }
     }
+
+    /**
+     *  Select address tapped by user
+     * @param {*} e 
+     */
 
     selectAddressHandler = (e) => {
         let elementId = e.target.id;
@@ -188,6 +200,11 @@ class Checkout extends Component {
             this.setState({ selectedAddressId: elementId.split('select-address-button-')[1] })
         }
     }
+
+    /**
+     * Input values change handler
+     * @param {*} e 
+     */
 
     onInputFieldChangeHandler = (e) => {
         let stateKey = e.target.id;
@@ -215,11 +232,21 @@ class Checkout extends Component {
         this.setState({ 'paymentId': e.target.value });
     }
 
+    /**
+     *  Close Messages
+     * 
+     */
     placeOrderHandlerMessageCloseHandler = () => {
         this.setState({ placeOrderHandlerMessageOpen: false });
     }
 
-    saveAddressHandler = () => {
+    /**
+     *  Validate Address form
+     * @returns 
+     * 
+     */
+
+    validateInputData = () => {
         let isValid = true;
         if (this.state.city === '') {
             this.setState({
@@ -252,10 +279,22 @@ class Checkout extends Component {
             isValid = false;
         }
 
-        if (!isValid) {
+        return isValid;
+
+
+    }
+
+    /**
+     *  Save Address Handler, make an api call to save address in DB. Do this only if controls are valid
+     *  
+     * @returns 
+     */
+
+    saveAddressHandler = () => {
+
+        if (!this.validateInputData) {
             return;
         }
-
         let address = {
             city: this.state.city,
             flat_building_name: this.state.flat,
@@ -287,6 +326,13 @@ class Checkout extends Component {
         xhr.setRequestHeader('content-type', 'application/json');
         xhr.send(JSON.stringify(address));
     }
+
+    /**
+     * Place order handler, it picks up cart order itesm, address, payment method
+     * 
+     * @returns 
+     * 
+     */
 
     placeOrderHandler = () => {
         debugger;
