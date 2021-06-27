@@ -82,13 +82,20 @@ const headerStyles = theme => ({
       color: '#fff',
     },
     color: "#fff",
+  },
+
+  loginModal: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+    minWidth: 400
   }
 
 })
 
-/**
- * 
- */
 const customStyles = {
   content: {
     top: '50%',
@@ -97,7 +104,7 @@ const customStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
-    minWidth: 400
+    minWidth: 310
   }
 };
 /**
@@ -192,14 +199,17 @@ class Header extends Component {
   processLogout = () => {
         let token = sessionStorage.getItem('access-token');
         let xhr = new XMLHttpRequest();
-        let that = this;
+        let self = this;
         xhr.addEventListener("readystatechange", function () {
             if (this.readyState === 4) {
                 sessionStorage.removeItem('access-token');
                 sessionStorage.removeItem('uuid');
                 sessionStorage.removeItem('first_name');
-                that.setState({   loggedIn: false,
+                self.setState({   loggedIn: false,
                 loggedInUserFirstName:'' });
+                if(self.props.screen === "Checkout") {
+                  this.navigateToHome();
+                }
             }
         });
         let url = this.props.baseUrl + 'customer/logout';
@@ -235,7 +245,7 @@ class Header extends Component {
       passwordRequired: 'dispNone',
       passwordInvalid: 'dispNone',
       notRegistered: 'dispNone',
-      firstname: 'James',
+      firstname: '',
       firstnameRequired: 'dispNone',
       lastname: '',
       email: '',
@@ -502,7 +512,9 @@ class Header extends Component {
       showSnackbar: false
     })
   }
-
+  /**
+   *  Navigate to Home page
+   */
 
   navigateToHome = () => {
     this.props.history.push('/')
@@ -634,7 +646,7 @@ class Header extends Component {
             </FormControl>
             <br /> <br />
 
-            <FormControl required fullWidth={true}>
+            <FormControl fullWidth={true}>
               <InputLabel htmlFor="lastname">Last Name</InputLabel>
               <Input id="lastname" type="text" lastname={this.state.lastname} onChange={this.lastnameChangeHandler} fullWidth={true} autoComplete='false' />
             </FormControl>
@@ -696,7 +708,7 @@ class Header extends Component {
         onClose={this.handleClose}
         message={this.state.snackbarMessage}
         key='bottom-left'
-        autoHideDuration={6000}
+        autoHideDuration={4000}
       />
     </div>)
   }

@@ -4,6 +4,7 @@ import Home from "./home/Home";
 import Details from './details/Details';
 import Checkout from './checkout/Checkout';
 import Profile from './profile/Profile';
+import HTTPRequestHandler from "../common/Http-handler";
 
 
 class Router extends Component {
@@ -11,6 +12,7 @@ class Router extends Component {
     constructor() {
         super();
         this.baseUrl = 'http://localhost:3080/api/';
+        HTTPRequestHandler.baseUrl= this.baseUrl
     }
 
     render(){

@@ -55,7 +55,7 @@ export default function CheckoutItems(props) {
             <Grid container>
                 <Grid item xs={12}>
                     <FormControl className='place-order-button'>
-                        <Button variant="contained" color="primary" onClick={props.placeOrder}>PLACE ORDER</Button>
+                        <Button variant="contained" color="primary" onClick={props.placeOrderHandler}>PLACE ORDER</Button>
                     </FormControl>
                 </Grid>
             </Grid>

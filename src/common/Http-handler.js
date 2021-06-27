@@ -1,7 +1,7 @@
 class HTTPRequestHandler {
 
 
-  static domainName = 'http://localhost:3080';
+  static baseUrl = '';
 
   /**
    *  Call Signup API 
@@ -10,7 +10,7 @@ class HTTPRequestHandler {
    */
 
   static doSignup = async (requestBody) => {
-    const response = await fetch(HTTPRequestHandler.domainName + '/api/customer/signup', {
+    const response = await fetch(HTTPRequestHandler.baseUrl + 'customer/signup', {
       method: 'POST', // *GET, POST, PUT, DELETE, etc.
       mode: 'cors', // no-cors, *cors, same-origin
       cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached // include, *same-origin, omit
@@ -30,27 +30,36 @@ class HTTPRequestHandler {
    */
 
   static getAllRestaurants = async () => {
-    const restaurantList = await fetch(HTTPRequestHandler.domainName + '/api/restaurant');
+    const restaurantList = await fetch(HTTPRequestHandler.baseUrl + 'restaurant');
     return restaurantList.json();
   }
 
-
+  /**
+   *  get restaurant details api call utility
+   * @param {*} id 
+   * @returns 
+   */
   static getRestaurantDetails = async (id) => {
-    const restaurantDetails = await fetch(HTTPRequestHandler.domainName + '/api/restaurant/'+id);
+    const restaurantDetails = await fetch(HTTPRequestHandler.baseUrl + 'restaurant/' + id);
     return restaurantDetails.json();
   }
 
+  /**
+   *  Utility to make login call
+   * @param {*} authentication 
+   * @returns 
+   */
 
-  async doLogin (authentication) {
-    const responseData = await fetch(HTTPRequestHandler.domainName + '/api/customer/login', {
+  async doLogin(authentication) {
+    const responseData = await fetch(HTTPRequestHandler.baseUrl + 'customer/login', {
       method: 'POST', // *GET, POST, PUT, DELETE, etc.
       cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached // include, *same-origin, omit
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'authorization': authentication
       },
-      body:{}// no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    }).then(response=>{
+      body: {}// no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    }).then(response => {
       response.json();
       if (response.status === 200) {
         console.log(response.headers.get('access-token'));

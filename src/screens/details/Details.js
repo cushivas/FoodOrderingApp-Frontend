@@ -36,7 +36,7 @@ const detailsStyles = theme => ({
         [theme.breakpoints.down('xs')]: {
             width: "90% !important",
             padding: theme.spacing(2),
-          }
+        }
     },
     container: {
         width: '75%',
@@ -67,7 +67,7 @@ const detailsStyles = theme => ({
         [theme.breakpoints.down('xs')]: {
             width: "90% !important",
             margin: theme.spacing(2),
-          }
+        }
     },
 
     rightItemContainer: {
@@ -75,7 +75,7 @@ const detailsStyles = theme => ({
         margin: theme.spacing(1),
         [theme.breakpoints.down('xs')]: {
             width: "95% !important",
-          }
+        }
     },
     leftmenu: {
         width: '100%',
@@ -101,11 +101,11 @@ class Details extends Component {
             cartItems: [],
             open: false,
             totalItems: 0,
-            nonloggedIn:false,
-            itemQuantityDecreased:false,
-            itemQuantityIncreased:false,
-            cartEmpty:false,
-            itemRemovedFromCart:false
+            nonloggedIn: false,
+            itemQuantityDecreased: false,
+            itemQuantityIncreased: false,
+            cartEmpty: false,
+            itemRemovedFromCart: false
 
         }; // Read values passed on state
     }
@@ -193,12 +193,13 @@ class Details extends Component {
         } else {
             currentOrderItems.items.splice(index, 1);
         }
-        this.setState({itemQuantityDecreased: true,
+        this.setState({
+            itemQuantityDecreased: true,
             orderItems: currentOrderItems
         });
         const totalAmt = this.state.totalAmount - price;
-        const totalItms = this.state.totalItems -1;
-        this.setState({totalItems: totalItms, totalAmount: totalAmt});
+        const totalItms = this.state.totalItems - 1;
+        this.setState({ totalItems: totalItms, totalAmount: totalAmt });
     }
 
     /**
@@ -236,15 +237,16 @@ class Details extends Component {
 
     checkoutHandler = () => {
         if (this.state.totalItems === 0) {
-            this.setState({cartEmpty: true});
+            this.setState({ cartEmpty: true });
         } else if (this.state.totalItems > 0 && sessionStorage.getItem('access-token') === null) {
-            this.setState({nonloggedIn: true});
+            this.setState({ nonloggedIn: true });
         } else {
             this.props.history.push({
                 pathname: '/checkout/',
                 state: {
                     orderItems: this.state.orderItems,
-                    total: this.state.totalAmount, restaurantName: this.restaurantDetails.restaurant_name
+                    total: this.state.totalAmount, restaurantName: this.restaurantDetails.restaurant_name,
+                    restaurantId: this.restaurantDetails.id
                 }
             })
         }
@@ -257,17 +259,13 @@ class Details extends Component {
     handleClose = () => {
         this.setState({
             open: false,
-            nonloggedIn:false,
-            itemQuantityDecreased:false,
-            itemQuantityIncreased:false,
-            cartEmpty:false,
-            itemRemovedFromCart:false
+            nonloggedIn: false,
+            itemQuantityDecreased: false,
+            itemQuantityIncreased: false,
+            cartEmpty: false,
+            itemRemovedFromCart: false
         })
     }
-
-
-
-
 
 
     render() {
@@ -334,13 +332,13 @@ class Details extends Component {
                     <div className={classes.leftItemContainer}>
                         {this.restaurantDetails.categories.map((category) => (
                             <Fragment>
-                                <Typography variant="caption" display="block" color="textSecondary" key={category.category_name}>
+                                <Typography variant="subtitle2" display="block" color="textSecondary" key={category.id}>
                                     <b> {category.category_name.toUpperCase()} </b>
                                 </Typography>
                                 <Divider />
                                 {category.item_list.map((item, itemIndex) => (
-                                    <Grid container key={item.id} style={{ marginBottom: 10, marginTop: 10 }}>
-                                        <Grid item xs={1} lg={1} key={item.id + itemIndex + 'icon'}>
+                                    <Grid container key={item.id} style={{ marginBottom: 10, marginTop: 10 }} key={item.id}>
+                                        <Grid item xs={1} lg={1} key={item.id + itemIndex + 'icon'} style={{ padding: 5 }} key={item.id + 1}>
                                             {
                                                 item.item_type === "VEG" ?
                                                     <span className="fa fa-circle" aria-hidden="true"
@@ -350,14 +348,14 @@ class Details extends Component {
                                                         style={{ fontSize: "12px", color: "#FF0000" }} />
                                             }
                                         </Grid>
-                                        <Grid item xs={6} lg={6}>
+                                        <Grid item xs={6} lg={6} style={{ padding: 5 }} key={item.id + 2}>
                                             <Typography>
                                                 <span
                                                     className="item-name">  {this.capitalize(item.item_name)} </span>
                                             </Typography>
                                         </Grid>
-                                        <Grid item xs={3} lg={3}>
-                                            <div style={{float:'right'}}>
+                                        <Grid item xs={3} lg={3} style={{ padding: 5 }} key={item.id + 3}>
+                                            <div style={{ float: 'right' }}>
                                                 <span>
                                                     <i className="fa fa-inr" aria-hidden="true"></i>
                                                     <span
@@ -366,8 +364,8 @@ class Details extends Component {
                                             </div>
                                         </Grid>
 
-                                        <Grid item xs={2} lg={2}>
-                                            <IconButton style={{ padding: '5px', float: 'right' }}
+                                        <Grid item xs={2} lg={2} key={item.id + 4}>
+                                            <IconButton style={{ padding: 5, float: 'right' }} key={item.id + 4 + 'addItemToCartHandler'}
                                                 onClick={(e) => this.addItemToCartHandler(e, item.id, item.item_type, item.item_name, item.price)}>
                                                 <AddIcon style={{ padding: 0, fontSize: "24px" }} />
                                             </IconButton>
@@ -391,12 +389,12 @@ class Details extends Component {
                                     </i>My Cart
                                 </div>
                                 <div className="cart-item-list">
-                                    <Grid container>
+                                    <Grid container key="cart-item-list">
                                         {
                                             this.state.orderItems.items !== undefined ?
                                                 this.state.orderItems.items.map((item, index) => (
                                                     <Fragment key={item.id}>
-                                                        <Grid item xs={2} lg={2}>
+                                                        <Grid item xs={2} lg={2} key={item.id + 1}>
                                                             {item.type === "VEG" ?
                                                                 <span className="fa fa-stop-circle-o"
                                                                     aria-hidden="true"
@@ -413,45 +411,42 @@ class Details extends Component {
                                                                         paddingRight: "12px"
                                                                     }} />}
                                                         </Grid>
-                                                        <Grid item xs={3} lg={4}>
+                                                        <Grid item xs={3} lg={4} key={item.id + 2}>
                                                             <Typography variant="subtitle1" color="textSecondary">
                                                                 {this.capitalize(item.name)}
                                                             </Typography>
                                                         </Grid>
-                                                        <Grid item xs={3} lg={3} style={{ flexWrap: "wrap" }}>
+                                                        <Grid item xs={3} lg={3} style={{ flexWrap: "wrap" }} key={item.id + 3}>
                                                             <div className='add-remove-icon'>
-                                                                <IconButton className='add-remove-button-hover'
-                                                                    style={{ display: "flex", padding: '5px'}}
-                                                                     onClick={(e) => this.removeFromCartHandler(e, item.id, item.type, item.name, item.pricePerItem)} ><RemoveIcon
-                                                                        fontSize='default'
-                                                                        style={{ color: 'black', fontWeight: "bolder" }} /></IconButton>
+                                                                <IconButton className='add-remove-button-hover add-remove-button'
+
+                                                                    onClick={(e) => this.removeFromCartHandler(e, item.id, item.type, item.name, item.pricePerItem)} >
+                                                                    <RemoveIcon
+                                                                        className="add-remove-icons" /></IconButton>
                                                                 <Typography variant="subtitle1"
                                                                     style={{ fontWeight: 'bold' }}>{item.quantity}</Typography>
-                                                                <IconButton className='add-remove-button-hover'
-                                                                    style={{ display: "flex", padding: '5px'}}
+                                                                <IconButton className='add-remove-button-hover add-remove-button'
+
                                                                     onClick={this.addItemDirectlyFromUserCart.bind(this, item, index)}>
-                                                                    <AddIcon fontSize='default' style={{
-                                                                        color: 'black',
-                                                                        fontWeight: "bolder"
-                                                                    }} /></IconButton>
+                                                                    <AddIcon className="add-remove-icons" /></IconButton>
                                                             </div>
                                                         </Grid>
-                                                        <Grid item xs={4} lg={3}>
+                                                        <Grid item xs={4} lg={3} key={item.id + 4}>
                                                             <span style={{ float: 'right' }}>
                                                                 <i className="fa fa-inr" aria-hidden="true"></i>
                                                                 <span
                                                                     style={{ paddingLeft: "2px" }}>{item.priceForAll.toFixed(2)}</span>
                                                             </span>
                                                         </Grid>
-                                                        <Divider />
+                                                        <Divider key={item.id + 5} />
                                                     </Fragment>
                                                 )) : null}
-                                        <Grid item xs={8} lg={9}>
+                                        <Grid item xs={8} lg={9} key='totalAmt'>
                                             <div style={{ marginTop: 15, marginBottom: 15 }}>
                                                 <span style={{ fontWeight: 'bold' }}>TOTAL AMOUNT</span>
                                             </div>
                                         </Grid>
-                                        <Grid item xs={4} lg={3}>
+                                        <Grid item xs={4} lg={3} key='totalAmtprice'>
                                             <div style={{ marginTop: 15, marginBottom: 15 }}>
                                                 <span style={{ fontWeight: 'bold', float: 'right' }}>
                                                     <i className="fa fa-inr" aria-hidden="true"
@@ -459,7 +454,7 @@ class Details extends Component {
                                                 </span>
                                             </div>
                                         </Grid>
-                                        <Grid item xs={12}>
+                                        <Grid item xs={12} key='checkout-container'>
                                             <Button className="checkout" variant="contained" color="primary" onClick={this.checkoutHandler}>
                                                 <Typography>CHECKOUT</Typography>
                                             </Button>
@@ -480,51 +475,51 @@ class Details extends Component {
                         autoHideDuration={3000}
                     />
 
-                        <Snackbar
+                    <Snackbar
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                         open={this.state.cartEmpty}
                         onClose={this.handleClose}
                         message="Please add an item to your cart!"
                         key='Please add an item to your cart!'
                         autoHideDuration={3000}
-                        />
+                    />
 
-                        <Snackbar
+                    <Snackbar
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                         open={this.state.itemQuantityDecreased}
                         onClose={this.handleClose}
                         message="Item quantity decreased by 1!"
                         key='Item quantity decreased by 1!'
                         autoHideDuration={3000}
-                        />
+                    />
 
-                        <Snackbar
+                    <Snackbar
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                         open={this.state.nonloggedIn}
                         onClose={this.handleClose}
                         message="Please login first!"
                         key='Please login first!'
                         autoHideDuration={3000}
-                        />
+                    />
 
 
-                        <Snackbar
+                    <Snackbar
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                         open={this.state.itemRemovedFromCart}
                         onClose={this.handleClose}
                         message="Item removed from cart!"
                         key='Item removed from cart!'
                         autoHideDuration={3000}
-                        />
+                    />
 
-                        <Snackbar
+                    <Snackbar
                         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
                         open={this.state.itemQuantityIncreased}
                         onClose={this.handleClose}
                         message="Item quantity increased by 1!"
                         key='Item quantity increased by 1!'
                         autoHideDuration={3000}
-                        />
+                    />
 
 
                 </div>}

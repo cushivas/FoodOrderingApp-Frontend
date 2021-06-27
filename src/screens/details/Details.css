@@ -18,10 +18,37 @@
     flex: 30%
 }
 
+@media (min-width: 320px) and (max-width: 900px) {
+    .add-remove-icon {
+        flex-direction: column;
+    }
+    .add-remove-button {
+        display: "flex";
+        padding: 0 !important;
+    }
+}
+
+.add-remove-button {
+    display: "flex";
+    padding: '5px';
+}
+
+
+
 .add-remove-button-hover:hover{
     background-color:lightgrey !important;
 }
 
 .add-icon-plus-button {
     display: flex;
+}
+
+.add-remove-icons {
+        color: 'black';
+        font-weight: "bolder";
+        font-size:'1.75rem';
+}
+
+.badge {
+    z-index: 0;
 }
